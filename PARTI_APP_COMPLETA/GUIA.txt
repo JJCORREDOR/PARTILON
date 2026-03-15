@@ -1,0 +1,19 @@
+
+GUIA RAPIDA
+
+OPCION 1 – APP ANDROID
+1. Instalar Android Studio
+2. Abrir carpeta /android
+3. Build → Build APK
+4. Instalar app-debug.apk en tu móvil
+
+OPCION 2 – APP WEB INSTALABLE
+1. Subir archivos de /pwa a un hosting
+2. Abrir en Chrome
+3. Añadir a pantalla de inicio
+
+MEJORAS INCLUIDAS
+- Vibración al generar carta
+- Temporizador automático
+- Preparado para WebView Android
+- Preparado para PWA

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PARTI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap');
+
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            
+            --c-question: #3b82f6;
+            --c-mimic: #fbbf24;
+            --c-taboo: #991b1b;
+            --c-pictionary: #10b981;
+            
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            color: var(--text-dark);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* HOME SCREEN */
+        .home-screen {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo-emoji {
+            font-size: 4.5rem;
+            display: block;
+            margin-bottom: 8px;
+            animation: bounce 2s infinite;
+        }
+
+        .logo-text {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            letter-spacing: -2px;
+        }
+
+        .logo-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .home-card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .diff-btn {
+            flex: 1;
+            padding: 10px 8px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .diff-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-generate:active {
+            transform: scale(0.97);
+        }
+
+        /* GAME MODAL */
+        .game-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+
+        .game-modal.active {
+            display: flex;
+        }
+
+        .game-header {
+            background: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .difficulty-badge {
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .game-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .section {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .bg-q { background-color: var(--c-question); }
+        .bg-m { background-color: var(--c-mimic); color: #422006; }
+        .bg-t { background-color: var(--c-taboo); }
+        .bg-p { background-color: var(--c-pictionary); }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.3;
+        }
+
+        .section-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            background: #f9fafb;
+            padding: 8px 10px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .answer-box {
+            background: #eff6ff;
+            border: 2px solid var(--c-question);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--c-question);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .option-item {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-item.correct {
+            border-color: var(--c-question);
+            background: #eff6ff;
+            color: var(--c-question);
+        }
+
+        .forbidden-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .forbidden-tag {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .game-footer {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        }
+
+        .btn-new-card {
+            flex: 2;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-new-card:active {
+            transform: scale(0.97);
+        }
+
+        .btn-exit {
+            flex: 1;
+            padding: 16px;
+            background: #f3f4f6;
+            color: var(--text-dark);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-exit:active {
+            background: #e5e7eb;
+        }
+
+        /* SVG Icons */
+        .svg-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Mobile optimizations */
+        @media (max-height: 700px) {
+            .logo-emoji {
+                font-size: 3.5rem;
+            }
+            .logo-text {
+                font-size: 2.8rem;
+            }
+            .home-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HOME SCREEN -->
+    <div class="home-screen" id="homeScreen">
+        <div class="logo-container">
+            <span class="logo-emoji">🎉</span>
+            <h1 class="logo-text">PARTI</h1>
+            <p class="logo-subtitle">¡El juego de fiestas!</p>
+        </div>
+
+        <div class="home-card">
+            <div class="control-group">
+                <label>Nivel de Dificultad</label>
+                <div class="difficulty-selector">
+                    <button class="diff-btn active" data-level="easy">Fácil</button>
+                    <button class="diff-btn" data-level="medium">Medio</button>
+                    <button class="diff-btn" data-level="pro">Pro</button>
+                </div>
+            </div>
+
+            <button class="btn-generate" onclick="openGame()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                Generar Carta
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME MODAL -->
+    <div class="game-modal" id="gameModal">
+        <div class="game-header">
+            <div class="game-title">PARTI</div>
+            <div class="difficulty-badge" id="gameDifficulty">FÁCIL</div>
+        </div>
+
+        <div class="game-content">
+            <div class="game-card" id="gameCard">
+                <!-- Question Section -->
+                <div class="section" id="questionSection">
+                    <div class="section-header">
+                        <span class="badge bg-q">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                            Pregunta
+                        </span>
+                    </div>
+                    <div class="section-title" id="q-text"></div>
+                    <div class="options-grid" id="q-options"></div>
+                    <div class="answer-box" id="q-answer"></div>
+                </div>
+
+                <!-- Mimic Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <span class="badge bg-m">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+                            Mímica
+                        </span>
+                    </div>
+                    <div class="section-title" id="m-text"></div>
+                    <div class="section-subtitle" id="m-hint"></div>
+                </div>
+
+                <!-- Taboo Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <span class="badge bg-t">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            Taboo
+                        </span>
+                    </div>
+                    <div class="section-title" id="t-text"></div>
+                    <div style="font-size: 0.7rem; color: #991b1b; font-weight: 700; margin: 8px 0 5px; text-transform: uppercase;">Palabras prohibidas:</div>
+                    <div class="forbidden-words" id="t-forbidden"></div>
+                </div>
+
+                <!-- Pictionary Section -->
+                <div class="section">
+                    <div class="section-header">
+                        <span class="badge bg-p">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21.7 13.35l-7.7-7.7c-.2-.2-.45-.3-.7-.3-.26 0-.51.1-.7.3l-10 10c-.39.39-.39 1.02 0 1.41l5.64 5.64c.2.2.45.3.71.3.26 0 .51-.1.71-.3l10-10c.39-.39.39-1.02 0-1.41zM12 19.59L6.41 14 12 8.41 17.59 14 12 19.59z"/></svg>
+                            Pictionary
+                        </span>
+                    </div>
+                    <div class="section-title" id="p-text"></div>
+                    <div class="section-subtitle" id="p-hint"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-footer">
+            <button class="btn-new-card" onclick="generateNewCard()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                NUEVA CARTA
+            </button>
+            <button class="btn-exit" onclick="closeGame()">SALIR</button>
+        </div>
+    </div>
+
+    <script>
+        let currentDifficulty = 'easy';
+        let lastCardIndex = -1;
+
+        const gameData = {
+            easy: [
+                {
+                    question: { text: "¿Cuál es el río más largo de España?", options: ["Ebro", "Tajo", "Duero"], correct: 0 },
+                    mimic: { text: "Cantar como Shakira", hint: "Cantante famosa" },
+                    taboo: { text: "MADRID", forbidden: ["Capital", "España", "Ciudad", "Centro"] },
+                    pictionary: { text: "Un bombero", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Qué instrumento toca un pianista?", answer: "El piano" },
+                    mimic: { text: "Harry Potter", hint: "Personaje de ficción" },
+                    taboo: { text: "FÚTBOL", forbidden: ["Deporte", "Pelota", "Gol", "Equipo"] },
+                    pictionary: { text: "Una guitarra", hint: "Objeto musical" }
+                },
+                {
+                    question: { text: "¿Cuántos jugadores hay en un equipo de fútbol?", options: ["9", "10", "11"], correct: 2 },
+                    mimic: { text: "Un cocinero preparando comida", hint: "Profesión" },
+                    taboo: { text: "PLAYA", forbidden: ["Arena", "Mar", "Verano", "Vacaciones"] },
+                    pictionary: { text: "Spiderman", hint: "Personaje de cómic" }
+                },
+                {
+                    question: { text: "¿En qué país está la Torre Eiffel?", answer: "Francia" },
+                    mimic: { text: "Bailar flamenco", hint: "Baile español" },
+                    taboo: { text: "ORDENADOR", forbidden: ["PC", "Pantalla", "Teclado", "Internet"] },
+                    pictionary: { text: "Una lavadora", hint: "Objeto doméstico" }
+                },
+                {
+                    question: { text: "¿Quién pintó la Mona Lisa?", options: ["Picasso", "Da Vinci", "Van Gogh"], correct: 1 },
+                    mimic: { text: "Un médico examinando paciente", hint: "Profesión" },
+                    taboo: { text: "MÓVIL", forbidden: ["Teléfono", "Llamar", "Pantalla", "Apps"] },
+                    pictionary: { text: "Un doctor", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Cuál es el planeta más cercano al Sol?", answer: "Mercurio" },
+                    mimic: { text: "Messi celebrando gol", hint: "Futbolista famoso" },
+                    taboo: { text: "GATO", forbidden: ["Animal", "Miau", "Mascota", "Peludo"] },
+                    pictionary: { text: "Un semáforo", hint: "Objeto de tráfico" }
+                },
+                {
+                    question: { text: "¿Qué gas respiramos para vivir?", options: ["Oxígeno", "Nitrógeno", "Helio"], correct: 0 },
+                    mimic: { text: "Un profesor dando clase", hint: "Profesión" },
+                    taboo: { text: "PIZZA", forbidden: ["Comida", "Italia", "Queso", "Redonda"] },
+                    pictionary: { text: "Correr", hint: "Acción deportiva" }
+                },
+                {
+                    question: { text: "¿Cuántos continentes hay?", answer: "Siete continentes" },
+                    mimic: { text: "Superman volando", hint: "Personaje de cómic" },
+                    taboo: { text: "LIBRO", forbidden: ["Leer", "Páginas", "Texto", "Papel"] },
+                    pictionary: { text: "Un dentista", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Quién es el rey del pop?", options: ["Elvis", "Michael Jackson", "Prince"], correct: 1 },
+                    mimic: { text: "Un carpintero trabajando", hint: "Profesión" },
+                    taboo: { text: "CAMA", forbidden: ["Dormir", "Descansar", "Habitación", "Colchón"] },
+                    pictionary: { text: "Nadar", hint: "Acción deportiva" }
+                },
+                {
+                    question: { text: "¿Cuál es el animal más rápido del mundo?", answer: "El guepardo" },
+                    mimic: { text: "Wonder Woman", hint: "Personaje de cómic" },
+                    taboo: { text: "COCHE", forbidden: ["Vehículo", "Ruedas", "Conducir", "Carretera"] },
+                    pictionary: { text: "Un reloj", hint: "Objeto" }
+                },
+                {
+                    question: { text: "¿En qué año llegó el hombre a la Luna?", options: ["1965", "1969", "1972"], correct: 1 },
+                    mimic: { text: "Un pintor pintando", hint: "Profesión" },
+                    taboo: { text: "ESCUELA", forbidden: ["Estudiar", "Clase", "Profesor", "Alumnos"] },
+                    pictionary: { text: "Un policía", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Qué instrumento tiene cuerdas y se toca con arco?", answer: "El violín" },
+                    mimic: { text: "Batman", hint: "Personaje de cómic" },
+                    taboo: { text: "PERRO", forbidden: ["Animal", "Ladrido", "Mascota", "Peludo"] },
+                    pictionary: { text: "Un camarero", hint: "Profesión" }
+                }
+            ],
+            medium: [
+                {
+                    question: { text: "¿Quién escribió 'Don Quijote'?", options: ["Lope de Vega", "Cervantes", "Quevedo"], correct: 1 },
+                    mimic: { text: "Freddie Mercury cantando", hint: "Cantante de Queen" },
+                    taboo: { text: "HARRY POTTER", forbidden: ["Magia", "Varita", "Hogwarts", "Mago"] },
+                    pictionary: { text: "Un arquitecto", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿En qué año cayó el muro de Berlín?", answer: "1989" },
+                    mimic: { text: "Un cirujano operando", hint: "Profesión médica" },
+                    taboo: { text: "TITANIC", forbidden: ["Barco", "Hielo", "Película", "Océano"] },
+                    pictionary: { text: "Escalar montaña", hint: "Acción deportiva" }
+                },
+                {
+                    question: { text: "¿Cuál es el país más poblado del mundo?", options: ["China", "India", "EEUU"], correct: 1 },
+                    mimic: { text: "El Joker (Guasón)", hint: "Villano de Batman" },
+                    taboo: { text: "NETFLIX", forbidden: ["Series", "Películas", "Streaming", "Ver"] },
+                    pictionary: { text: "Iron Man", hint: "Personaje de Marvel" }
+                },
+                {
+                    question: { text: "¿Quién compuso las Cuatro Estaciones?", answer: "Vivaldi" },
+                    mimic: { text: "Un fotógrafo tomando fotos", hint: "Profesión" },
+                    taboo: { text: "INSTAGRAM", forbidden: ["Red social", "Foto", "Likes", "App"] },
+                    pictionary: { text: "Un electricista", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Qué elemento químico tiene símbolo 'Au'?", options: ["Plata", "Oro", "Cobre"], correct: 1 },
+                    mimic: { text: "Darth Vader", hint: "Villano de Star Wars" },
+                    taboo: { text: "YOUTUBE", forbidden: ["Vídeos", "Google", "Ver", "Canal"] },
+                    pictionary: { text: "Un martillo", hint: "Objeto de herramienta" }
+                },
+                {
+                    question: { text: "¿Cuál es la capital de Australia?", answer: "Canberra" },
+                    mimic: { text: "Un abogado en juicio", hint: "Profesión" },
+                    taboo: { text: "SPOTIFY", forbidden: ["Música", "Canciones", "App", "Escuchar"] },
+                    pictionary: { text: "Escribir a máquina", hint: "Acción de oficina" }
+                },
+                {
+                    question: { text: "¿Quién dirigió 'Pulp Fiction'?", options: ["Scorsese", "Tarantino", "Spielberg"], correct: 1 },
+                    mimic: { text: "Marilyn Monroe", hint: "Actriz famosa" },
+                    taboo: { text: "TWITTER", forbidden: ["Red social", "Tweets", "X", "App"] },
+                    pictionary: { text: "Un periodista", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿En qué año comenzó la Segunda Guerra Mundial?", answer: "1939" },
+                    mimic: { text: "Un periodista entrevistando", hint: "Profesión" },
+                    taboo: { text: "TIKTOK", forbidden: ["Vídeos", "Baile", "App", "Red social"] },
+                    pictionary: { text: "Joker (Joaquin Phoenix)", hint: "Personaje de película" }
+                },
+                {
+                    question: { text: "¿Qué pintor se cortó la oreja?", options: ["Van Gogh", "Picasso", "Dalí"], correct: 0 },
+                    mimic: { text: "Un camarero sirviendo", hint: "Profesión" },
+                    taboo: { text: "AMAZON", forbidden: ["Compra", "Online", "Paquete", "Web"] },
+                    pictionary: { text: "Un fontanero", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Cuál es el océano más grande?", answer: "El Pacífico" },
+                    mimic: { text: "Elvis Presley cantando", hint: "Cantante famoso" },
+                    taboo: { text: "MICROONDAS", forbidden: ["Calentar", "Comida", "Electrodoméstico", "Cocina"] },
+                    pictionary: { text: "Una aspiradora", hint: "Objeto doméstico" }
+                },
+                {
+                    question: { text: "¿Quién pintó 'El Guernica'?", options: ["Dalí", "Picasso", "Miró"], correct: 1 },
+                    mimic: { text: "Un policía arrestando", hint: "Profesión" },
+                    taboo: { text: "LAVADORA", forbidden: ["Ropa", "Lavar", "Electrodoméstico", "Agua"] },
+                    pictionary: { text: "Un veterinario", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Qué país ganó el Mundial 2010?", answer: "España" },
+                    mimic: { text: "Chaplin", hint: "Actor de cine mudo" },
+                    taboo: { text: "CHATGPT", forbidden: ["IA", "Chat", "Respuestas", "Bot"] },
+                    pictionary: { text: "Un telescopio", hint: "Objeto científico" }
+                }
+            ],
+            pro: [
+                {
+                    question: { text: "¿Quién compuso 'La Flauta Mágica'?", options: ["Beethoven", "Mozart", "Bach"], correct: 1 },
+                    mimic: { text: "Napoleón Bonaparte", hint: "Emperador francés" },
+                    taboo: { text: "INCEPTION", forbidden: ["Sueños", "DiCaprio", "Nolan", "Cine"] },
+                    pictionary: { text: "Un neurocirujano", hint: "Profesión médica" }
+                },
+                {
+                    question: { text: "¿En qué año se fundó la ONU?", answer: "1945" },
+                    mimic: { text: "Un neurocirujano operando", hint: "Profesión médica especializada" },
+                    taboo: { text: "QUANTUM", forbidden: ["Física", "Partícula", "Ciencia", "Energía"] },
+                    pictionary: { text: "Un piloto de Fórmula 1", hint: "Profesión deportiva" }
+                },
+                {
+                    question: { text: "¿Quién escribió 'Cien años de soledad'?", options: ["Borges", "García Márquez", "Cortázar"], correct: 1 },
+                    mimic: { text: "Albert Einstein", hint: "Científico famoso" },
+                    taboo: { text: "BLOCKCHAIN", forbidden: ["Cripto", "Bitcoin", "Cadena", "Digital"] },
+                    pictionary: { text: "Un sumiller", hint: "Profesión del vino" }
+                },
+                {
+                    question: { text: "¿Qué filósofo dijo 'Pienso, luego existo'?", answer: "Descartes" },
+                    mimic: { text: "Un director de orquesta", hint: "Profesión musical" },
+                    taboo: { text: "INTELIGENCIA ARTIFICIAL", forbidden: ["IA", "Robot", "Tecnología", "Futuro"] },
+                    pictionary: { text: "Un restaurador de arte", hint: "Profesión" }
+                },
+                {
+                    question: { text: "¿Cuál es el metal más caro del mundo?", options: ["Oro", "Rodio", "Platino"], correct: 1 },
+                    mimic: { text: "Frida Kahlo pintando", hint: "Pintora mexicana" },
+                    taboo: { text: "METAVESO", forbidden: ["Virtual", "Realidad", "Facebook", "Digital"] },
+                    pictionary: { text: "Un perito judicial", hint: "Profesión legal" }
+                },
+                {
+                    question: { text: "¿Quién dirigió '2001: Odisea del espacio'?", options: ["Kubrick", "Spielberg", "Lucas"], correct: 0 },
+                    mimic: { text: "Un mago haciendo trucos", hint: "Profesión de entretenimiento" },
+                    taboo: { text: "NFT", forbidden: ["Digital", "Arte", "Cripto", "Token"] },
+                    pictionary: { text: "Un controlador aéreo", hint: "Profesión de aviación" }
+                },
+                {
+                    question: { text: "¿En qué año cayó el Imperio Romano de Occidente?", answer: "476 d.C." },
+                    mimic: { text: "Un forense examinando", hint: "Profesión médica" },
+                    taboo: { text: "TESLA", forbidden: ["Coche", "Elon", "Eléctrico", "Musk"] },
+                    pictionary: { text: "Un etnógrafo", hint: "Profesión antropológica" }
+                },
+                {
+                    question: { text: "¿Quién pintó 'Las Meninas'?", options: ["Velázquez", "Goya", "El Greco"], correct: 0 },
+                    mimic: { text: "Un controlador aéreo", hint: "Profesión de aviación" },
+                    taboo: { text: "REALIDAD VIRTUAL", forbidden: ["Gafas", "Simulación", "Tecnología", "3D"] },
+                    pictionary: { text: "Un barista", hint: "Profesión de cafetería" }
+                },
+                {
+                    question: { text: "¿Qué compositor era sordo?", options: ["Mozart", "Beethoven", "Chopin"], correct: 1 },
+                    mimic: { text: "Un sommelier cataando vino", hint: "Profesión enológica" },
+                    taboo: { text: "SPACE X", forbidden: ["Cohete", "Espacio", "Elon", "NASA"] },
+                    pictionary: { text: "Un actuario", hint: "Profesión de seguros" }
+                },
+                {
+                    question: { text: "¿Quién escribió 'La Divina Comedia'?", answer: "Dante Alighieri" },
+                    mimic: { text: "Un arqueólogo excavando", hint: "Profesión científica" },
+                    taboo: { text: "WIFI", forbidden: ["Internet", "Señal", "Conexión", "Router"] },
+                    pictionary: { text: "Un microscopio", hint: "Objeto científico" }
+                },
+                {
+                    question: { text: "¿En qué año se descubrió América?", options: ["1492", "1498", "1502"], correct: 0 },
+                    mimic: { text: "Un actuario calculando", hint: "Profesión de seguros" },
+                    taboo: { text: "BLUETOOTH", forbidden: ["Conexión", "Inalámbrico", "Móvil", "Audio"] },
+                    pictionary: { text: "Un notario", hint: "Profesión legal" }
+                },
+                {
+                    question: { text: "¿Quién compuso 'El Lago de los Cisnes'?", answer: "Tchaikovsky" },
+                    mimic: { text: "Un barista haciendo café", hint: "Profesión de cafetería" },
+                    taboo: { text: "CHATGPT", forbidden: ["IA", "Chat", "Respuestas", "Bot"] },
+                    pictionary: { text: "Un compás", hint: "Objeto de dibujo" }
+                }
+            ]
+        };
+
+        const difficultyLabels = {
+            easy: 'FÁCIL',
+            medium: 'MEDIO',
+            pro: 'PRO'
+        };
+
+        // Difficulty selector
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDifficulty = btn.dataset.level;
+                lastCardIndex = -1; // Reset when changing difficulty
+            });
+        });
+
+        function getRandomItem(array) {
+            let newIndex;
+            // Ensure we get a different card than the last one
+            do {
+                newIndex = Math.floor(Math.random() * array.length);
+            } while (newIndex === lastCardIndex && array.length > 1);
+            
+            lastCardIndex = newIndex;
+            return array[newIndex];
+        }
+
+        function openGame() {
+            document.getElementById('gameModal').classList.add('active');
+            document.getElementById('gameDifficulty').textContent = difficultyLabels[currentDifficulty];
+            generateNewCard();
+        }
+
+        function closeGame() {
+            document.getElementById('gameModal').classList.remove('active');
+        }
+
+        function generateNewCard() {
+            const card = document.getElementById('gameCard');
+            const data = getRandomItem(gameData[currentDifficulty]);
+
+            // Re-trigger animation
+            card.style.animation = 'none';
+            card.offsetHeight;
+            card.style.animation = 'popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+            // Question Section - ALWAYS appears with answer
+            const questionSection = document.getElementById('questionSection');
+            questionSection.classList.remove('hidden');
+            document.getElementById('q-text').textContent = data.question.text;
+            
+            const qOptionsContainer = document.getElementById('q-options');
+            const qAnswerBox = document.getElementById('q-answer');
+            qOptionsContainer.innerHTML = '';
+            
+            if (data.question.options) {
+                // Show options for 1 out of 3-4 questions
+                data.question.options.forEach((opt, index) => {
+                    const div = document.createElement('div');
+                    div.className = `option-item ${index === data.question.correct ? 'correct' : ''}`;
+                    div.textContent = opt;
+                    if(index === data.question.correct) {
+                        div.innerHTML += ' ✓';
+                    }
+                    qOptionsContainer.appendChild(div);
+                });
+                qAnswerBox.textContent = `Respuesta: ${data.question.options[data.question.correct]}`;
+            } else {
+                // Open question - just show answer
+                qAnswerBox.textContent = `Respuesta: ${data.question.answer}`;
+            }
+
+            // Mimic Section
+            document.getElementById('m-text').textContent = data.mimic.text;
+            document.getElementById('m-hint').textContent = `💡 ${data.mimic.hint}`;
+
+            // Taboo Section
+            document.getElementById('t-text').textContent = data.taboo.text;
+            const tForbiddenContainer = document.getElementById('t-forbidden');
+            tForbiddenContainer.innerHTML = '';
+            data.taboo.forbidden.forEach(word => {
+                const span = document.createElement('span');
+                span.className = 'forbidden-tag';
+                span.textContent = word;
+                tForbiddenContainer.appendChild(span);
+            });
+
+            // Pictionary Section
+            document.getElementById('p-text').textContent = data.pictionary.text;
+            document.getElementById('p-hint').textContent = `💡 ${data.pictionary.hint}`;
+        }
+    </script>
+</body>
+</html>
+
